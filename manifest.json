@@ -2,8 +2,8 @@
   "name": "MetalINV - Control de Inventario",
   "short_name": "MetalINV",
   "description": "App de control de inventario profesional para taller de aluminio y vidrio. Gestiona stock base, sobrantes reutilizables y lista de compras.",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/MetalINV/",
+  "scope": "/MetalINV/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "theme_color": "#0a0a0a",
@@ -17,25 +17,20 @@
       "form_factor": "narrow"
     }
   ],
-  "icons": [
+    "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23c8ff00;stop-opacity:1' /><stop offset='100%' style='stop-color:%2300d4aa;stop-opacity:1' /></linearGradient></defs><rect fill='url(%23g)' width='192' height='192' rx='40'/><text x='96' y='130' font-size='100' fill='%23000' text-anchor='middle' font-weight='700' font-family='monospace'>▣</text></svg>",
+      "src": "icon.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23c8ff00;stop-opacity:1' /><stop offset='100%' style='stop-color:%2300d4aa;stop-opacity:1' /></linearGradient></defs><rect fill='url(%23g)' width='192' height='192' rx='40'/><text x='96' y='130' font-size='100' fill='%23000' text-anchor='middle' font-weight='700' font-family='monospace'>▣</text></svg>",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
-    },
-    {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23c8ff00;stop-opacity:1' /><stop offset='100%' style='stop-color:%2300d4aa;stop-opacity:1' /></linearGradient></defs><rect fill='url(%23g)' width='512' height='512' rx='100'/><text x='256' y='380' font-size='280' fill='%23000' text-anchor='middle' font-weight='700' font-family='monospace'>▣</text></svg>",
+      "src": "icon.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "type": "image/png"
     }
+  ],
+  "related_applications": [
+
   ],
   "shortcuts": [
     {
