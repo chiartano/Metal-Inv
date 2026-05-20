@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>MetalINV</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23c8ff00;stop-opacity:1' /><stop offset='100%' style='stop-color:%2300d4aa;stop-opacity:1' /></linearGradient></defs><rect fill='url(%23g)' width='192' height='192' rx='40'/><text x='96' y='130' font-size='100' fill='%23000' text-anchor='middle' font-weight='700' font-family='monospace'>▣</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+:root{
+  --bg:#0a0a0a;--s1:#111;--s2:#1a1a1a;--s3:#232323;--bdr:#2a2a2a;
+  --acc:#c8ff00;--acc2:#00d4aa;--warn:#ffaa00;--err:#ff4444;--blue:#4a9eff;
+  --txt:#f0f0f0;--sub:#6b6b6b;--sub2:#444;--r:12px;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif}
+#app{display:flex;flex-direction:column;height:100dvh;max-width:430px;margin:0 auto}
+
+/* ── HEADER ── */
+.hdr{padding:14px 16px 12px;background:var(--s1);border-bottom:1px solid var(--bdr);flex-shrink:0}
+.hdr-top{display:flex;align-items:flex-start;justify-content:space-between}
+.logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;letter-spacing:2px}
+.logo em{color:var(--acc);font-style:normal}
+.hdr-valor{text-align:right}
+.hdr-num{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:500;color:var(--acc);line-height:1}
+.hdr-num-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);margin-top:2px}
+.hdr-breakdown{display:flex;gap:14px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bdr)}
+.hdr-mini{flex:1;text-align:center}
+.hdr-mini-n{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500}
+.hdr-mini-l{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--sub);margin-top:1px}
+
+/* ── NAV ── */
+.nav{display:grid;grid-template-columns:repeat(3,1fr);background:var(--s1);border-bottom:1px solid var(--bdr);flex-shrink:0}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px 8px;cursor:pointer;border:none;background:none;color:var(--sub);border-bottom:2px solid transparent;transition:all .15s;position:relative}
+.nav-btn.on{color:var(--acc);border-bottom-color:var(--acc)}
+.nav-ico{font-size:18px;line-height:1}
+.nav-lbl{font-size:9px;letter-spacing:1px;text-transform:uppercase;font-weight:600;font-family:'DM Sans',sans-serif}
+.nav-badge{position:absolute;top:6px;right:18px;background:var(--err);color:#fff;font-size:8px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+
+/* ── CONTENT ── */
+#content{flex:1;overflow-y:auto;padding:12px 12px 84px;display:flex;flex-direction:column;gap:10px}
+::-webkit-scrollbar{width:2px}::-webkit-scrollbar-thumb{background:var(--bdr)}
+
+/* ── FAB ── */
+.fab{position:fixed;bottom:18px;right:14px;width:54px;height:54px;border-radius:50%;background:var(--acc);border:none;color:#000;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 1px rgba(200,255,0,.3),0 8px 32px rgba(200,255,0,.25);z-index:100;transition:transform .12s,box-shadow .12s;font-weight:300;line-height:1}
+.fab:active{transform:scale(.88);box-shadow:0 0 0 1px rgba(200,255,0,.2),0 4px 16px rgba(200,255,0,.15)}
+
+/* ── SECTION LABEL ── */
+.sec{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--sub);font-weight:600;padding:0 2px}
+
+/* ── STAT CARDS ── */
+.stats2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.statc{background:var(--s2);border:1px solid var(--bdr);border-radius:var(--r);padding:14px 12px}
+.statc-n{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:500;line-height:1;margin-bottom:4px}
+.statc-l{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--sub);font-weight:600}
+.statc-wide{grid-column:span 2;display:flex;align-items:center;justify-content:space-between;padding:12px 14px}
+
+/* ── COMPRA LIST ── */
+.compra-card{background:linear-gradient(135deg,rgba(255,68,68,.06),transparent);border:1px solid rgba(255,68,68,.2);border-radius:var(--r);padding:12px}
+.compra-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr)}
+.compra-row:last-child{border-bottom:none;padding-bottom:0}
+.compra-name{font-size:13px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.compra-qty{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--err);flex-shrink:0}
+.share-btn{display:flex;align-items:center;gap:6px;padding:9px 14px;background:rgba(200,255,0,.08);border:1px solid rgba(200,255,0,.2);border-radius:8px;color:var(--acc);font-size:12px;font-weight:600;cursor:pointer;width:100%;margin-top:10px;justify-content:center;font-family:'DM Sans',sans-serif;letter-spacing:.3px}
+.share-btn:active{background:rgba(200,255,0,.15)}
+
+/* ── SEARCH ── */
+.search-wrap{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--bdr);border-radius:var(--r);padding:10px 12px}
+.search-wrap input{flex:1;background:none;border:none;color:var(--txt);font-size:14px;outline:none;font-family:'DM Sans',sans-serif}
+.search-wrap input::placeholder{color:var(--sub)}
+
+/* ── CHIPS ── */
+.chips{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}
+.chips::-webkit-scrollbar{display:none}
+.chip{padding:5px 12px;border-radius:20px;border:1px solid var(--bdr);font-size:11px;cursor:pointer;background:var(--s2);color:var(--sub);white-space:nowrap;transition:all .12s;font-weight:600;letter-spacing:.3px;flex-shrink:0}
+.chip.on{background:var(--acc);color:#000;border-color:var(--acc)}
+
+/* ── BASE LIST ITEM ── */
+.bli{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;transition:border-color .15s}
+.bli.alert{border-left:3px solid var(--err)}
+.bli.warn{border-left:3px solid var(--warn)}
+.bli-main{display:flex;align-items:center;gap:0;padding:11px 12px}
+.bli-info{flex:1;min-width:0;cursor:pointer}
+.bli-name{font-size:14px;font-weight:500;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bli-meta{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.bli-controls{display:flex;align-items:center;gap:0;flex-shrink:0;margin-left:10px}
+.qty-btn{width:36px;height:36px;border:none;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s,background .1s;font-weight:500;line-height:1;user-select:none;-webkit-user-select:none}
+.qty-btn:active{transform:scale(.85)}
+.qty-minus{background:rgba(255,68,68,.1);color:var(--err)}
+.qty-minus:active{background:rgba(255,68,68,.2)}
+.qty-plus{background:rgba(200,255,0,.1);color:var(--acc)}
+.qty-plus:active{background:rgba(200,255,0,.2)}
+.qty-val{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;min-width:42px;text-align:center;cursor:pointer}
+.bli-edit{padding:5px 8px 9px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--bdr);background:var(--bg)}
+
+/* ── SOBRANTE ITEM ── */
+.sli{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r);padding:12px;cursor:pointer;transition:background .1s}
+.sli:active{background:var(--s2)}
+.sli.reutilizable{border-left:3px solid var(--acc2)}
+.sli-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
+.sli-specs{font-size:14px;font-weight:500;flex:1;line-height:1.3}
+.sli-qty{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;flex-shrink:0;text-align:right}
+.sli-meta{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;flex-shrink:0}
+.b-al{background:rgba(200,255,0,.12);color:var(--acc)}
+.b-vi{background:rgba(74,158,255,.12);color:var(--blue)}
+.b-he{background:rgba(0,212,170,.12);color:var(--acc2)}
+.b-in{background:rgba(107,107,107,.15);color:var(--sub)}
+.b-re{background:rgba(0,212,170,.15);color:var(--acc2)}
+.b-nre{background:rgba(107,107,107,.12);color:var(--sub)}
+.code{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);background:var(--s3);padding:1px 5px;border-radius:4px}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:52px 20px 32px;color:var(--sub)}
+.empty-ico{font-size:40px;margin-bottom:10px;opacity:.5}
+.empty-txt{font-size:13px;line-height:1.7}
+
+/* ── OVERLAY / SHEET ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:flex;flex-direction:column;justify-content:flex-end;backdrop-filter:blur(4px)}
+.sheet{background:var(--s1);border-top:1px solid var(--bdr);border-radius:20px 20px 0 0;max-height:94vh;overflow-y:auto;animation:up .2s ease-out}
+@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sh-handle{width:32px;height:3px;background:var(--bdr);border-radius:2px;margin:10px auto 0}
+.sh-hdr{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 12px;border-bottom:1px solid var(--bdr)}
+.sh-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700}
+.sh-close{background:var(--s3);border:none;color:var(--sub);cursor:pointer;border-radius:8px;padding:5px 9px;font-size:12px}
+.sh-body{padding:16px;display:flex;flex-direction:column;gap:12px;padding-bottom:32px}
+
+/* ── FORM ── */
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--sub);font-weight:600}
+.field input,.field select,.field textarea{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;color:var(--txt);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s;width:100%;-webkit-appearance:none;-moz-appearance:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--acc)}
+.field select option{background:var(--bg)}
+.field textarea{resize:none;min-height:56px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+/* ── BUTTONS ── */
+.btn{border:none;border-radius:8px;padding:12px 16px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .12s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn:active{transform:scale(.96)}
+.btn-acc{background:var(--acc);color:#000}
+.btn-del{background:rgba(255,68,68,.08);color:var(--err);border:1px solid rgba(255,68,68,.2)}
+.btn-ghost{background:var(--s3);color:var(--txt)}
+.btn-sm{padding:7px 11px;font-size:12px;border-radius:6px}
+.btn-full{width:100%}
+.btn-row{display:flex;gap:8px}
+.btn-row .btn{flex:1}
+
+/* ── QTY ADJUST CONFIRM ── */
+.adj-row{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--s3);border-radius:8px;margin-bottom:2px}
+.adj-label{font-size:13px}
+.adj-val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500}
+
+/* ── CHIPS inside form ── */
+.form-chips{display:flex;gap:6px;flex-wrap:wrap}
+.form-chip{padding:6px 12px;border-radius:20px;border:1px solid var(--bdr);font-size:12px;cursor:pointer;background:var(--s2);color:var(--sub);transition:all .12s;font-weight:600}
+.form-chip.on{background:var(--acc);color:#000;border-color:var(--acc)}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hdr">
+    <div class="hdr-top">
+      <div>
+        <div class="logo">METAL<em>INV</em></div>
+        <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);margin-top:2px">Control de inventario</div>
+      </div>
+      <div class="hdr-valor">
+        <div class="hdr-num" id="hdr-total">$0</div>
+        <div class="hdr-num-label">Capital en stock</div>
+      </div>
+    </div>
+    <div class="hdr-breakdown">
+      <div class="hdr-mini"><div class="hdr-mini-n" id="hm-base" style="color:var(--acc)">$0</div><div class="hdr-mini-l">Inventario base</div></div>
+      <div style="width:1px;background:var(--bdr)"></div>
+      <div class="hdr-mini"><div class="hdr-mini-n" id="hm-sob" style="color:var(--acc2)">$0</div><div class="hdr-mini-l">Sobrantes</div></div>
+      <div style="width:1px;background:var(--bdr)"></div>
+      <div class="hdr-mini"><div class="hdr-mini-n" id="hm-items" style="color:var(--sub)">0</div><div class="hdr-mini-l">Items totales</div></div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" data-tab="dash" onclick="go('dash')">
+      <span class="nav-ico">◈</span><span class="nav-lbl">Panel</span>
+      <span class="nav-badge" id="nb-dash" style="display:none"></span>
+    </button>
+    <button class="nav-btn" data-tab="base" onclick="go('base')">
+      <span class="nav-ico">▣</span><span class="nav-lbl">Base</span>
+      <span class="nav-badge" id="nb-base" style="display:none"></span>
+    </button>
+    <button class="nav-btn" data-tab="sob" onclick="go('sob')">
+      <span class="nav-ico">◎</span><span class="nav-lbl">Sobrantes</span>
+    </button>
+  </div>
+
+  <div id="content"></div>
+  <button class="fab" id="fab" onclick="fabAction()" style="display:none">+</button>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" style="display:none" onclick="overlayClickHandler(event)">
+  <div class="sheet" id="sheet" onclick="event.stopPropagation()">
+    <div class="sh-handle"></div>
+    <div class="sh-hdr">
+      <div class="sh-title" id="sh-title"></div>
+      <button class="sh-close" onclick="closeModal()">✕ cerrar</button>
+    </div>
+    <div class="sh-body" id="sh-body"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════
+const TIPOS   = ['Aluminio','Vidrio','Herraje','Insumo'];
+const UNIDS   = ['m','m²','und','kg','lt','rollo','caja','juego'];
+const COLORES = ['Natural','Negro','Blanco','Bronce','Champagne','Gris','Otro'];
+const UBICS   = ['Taller','Bodega A','Bodega B','Externo'];
+const TUSOS   = ['Puerta','Ventana','Fijo','Baño','Divisor','Otro'];
+const TB = {Aluminio:'b-al',Vidrio:'b-vi',Herraje:'b-he',Insumo:'b-in'};
+
+let S = { tab:'dash', base:[], sob:[], search:'', fBase:'Todos', fSob:'Disponibles' };
+
+function load(){ try{S.base=JSON.parse(localStorage.inv_base||'[]')}catch(e){S.base=[]} try{S.sob=JSON.parse(localStorage.inv_sob||'[]')}catch(e){S.sob=[]} }
+function save(){ localStorage.inv_base=JSON.stringify(S.base); localStorage.inv_sob=JSON.stringify(S.sob); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,5).toUpperCase(); }
+function cop(n){ return new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',minimumFractionDigits:0}).format(Number(n)||0); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function bdg(t,c){ return `<span class="badge ${c||''}">${esc(t)}</span>`; }
+function tbdg(t){ return bdg(t,TB[t]||'b-in'); }
+
+// ══════════════════════════════════════════════
+// HEADER + BADGES
+// ══════════════════════════════════════════════
+function updateHeader(){
+  const valBase = S.base.reduce((s,x)=>s+(qty(x)*unit(x)),0);
+  const valSob  = S.sob.reduce((s,x)=>s+(qty(x)*unit(x)),0);
+  const low = S.base.filter(x=>qty(x)<=Number(x.minQty||0)&&x.minQty>0).length;
+  document.getElementById('hdr-total').textContent = cop(valBase+valSob);
+  document.getElementById('hm-base').textContent   = cop(valBase);
+  document.getElementById('hm-sob').textContent    = cop(valSob);
+  document.getElementById('hm-items').textContent  = S.base.length+S.sob.length;
+  const nb = document.getElementById('nb-base');
+  if(low>0){ nb.style.display='flex'; nb.textContent=low; } else { nb.style.display='none'; }
+}
+function qty(x){ return Number(x.qty)||0; }
+function unit(x){ return Number(x.unitCost)||0; }
+
+// ══════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════
+function go(tab){
+  S.tab=tab; S.search='';
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  document.getElementById('fab').style.display = tab==='dash'?'none':'flex';
+  render();
+}
+
+// ══════════════════════════════════════════════
+// RENDER DISPATCH
+// ══════════════════════════════════════════════
+function render(){
+  updateHeader();
+  const c=document.getElementById('content');
+  if(S.tab==='dash') c.innerHTML=renderDash();
+  else if(S.tab==='base') c.innerHTML=renderBase();
+  else if(S.tab==='sob') c.innerHTML=renderSob();
+}
+
+// ══════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════
+function renderDash(){
+  const low = S.base.filter(x=>qty(x)<=Number(x.minQty||0)&&x.minQty>0);
+  const reutilizables = S.sob.filter(x=>x.reusable==='Sí');
+  const valBase = S.base.reduce((s,x)=>s+(qty(x)*unit(x)),0);
+  const valSob  = S.sob.reduce((s,x)=>s+(qty(x)*unit(x)),0);
+
+  // distribución por tipo
+  const byTipo = TIPOS.map(t=>{
+    const items = S.base.filter(x=>x.tipo===t);
+    const val = items.reduce((s,x)=>s+(qty(x)*unit(x)),0);
+    return {t,n:items.length,val};
+  }).filter(x=>x.n>0);
+  const maxVal = Math.max(...byTipo.map(x=>x.val),1);
+
+  const tipoRows = byTipo.map(({t,n,val})=>`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div style="width:80px;flex-shrink:0">${tbdg(t)}</div>
+      <div style="flex:1">
+        <div style="height:4px;background:var(--s3);border-radius:2px">
+          <div style="height:100%;width:${Math.round(val/maxVal*100)}%;background:var(--acc);border-radius:2px;transition:width .3s"></div>
+        </div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sub);width:28px;text-align:right">${n}</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt);width:72px;text-align:right">${cop(val)}</div>
+    </div>`).join('');
+
+  // lista de compras
+  let compraHTML = '';
+  if(low.length>0){
+    const rows = low.map(x=>`
+      <div class="compra-row">
+        <span class="compra-name">${esc(x.nombre)}</span>
+        <span class="compra-qty">${qty(x)}/${x.minQty} ${esc(x.unidad||'')}</span>
+      </div>`).join('');
+    const shareText = '🛒 *Lista de compras urgente*\n\n'+low.map(x=>`• ${x.nombre} — tiene ${qty(x)}, necesita mín ${x.minQty} ${x.unidad||''}`).join('\n');
+    compraHTML = `
+      <div class="sec">⚠ Comprar urgente (${low.length})</div>
+      <div class="compra-card">
+        ${rows}
+        <button class="share-btn" onclick="shareCompra()">↗ Compartir lista por WhatsApp</button>
+      </div>`;
+    window._shareText = shareText;
+  }
+
+  // sobrantes disponibles top
+  const topReut = reutilizables.slice(0,4);
+  const reutHTML = topReut.length>0 ? topReut.map(x=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr)">
+      <div>
+        <div style="font-size:13px;font-weight:500">${esc(x.specs||x.tipo)}</div>
+        <div style="display:flex;gap:5px;margin-top:2px">${tbdg(x.tipo)}${x.tipoUso?`<span style="font-size:10px;color:var(--sub)">${esc(x.tipoUso)}</span>`:''}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--acc2)">${qty(x)} ${esc(x.unidad||'')}</div>
+        ${unit(x)?`<div style="font-size:10px;color:var(--sub)">${cop(qty(x)*unit(x))}</div>`:''}
+      </div>
+    </div>`).join('')
+    +( reutilizables.length>4 ? `<div style="font-size:11px;color:var(--sub);text-align:center;padding-top:8px;cursor:pointer" onclick="go('sob')">Ver todos (${reutilizables.length}) →</div>` : '' )
+    : `<div style="font-size:13px;color:var(--sub);padding:8px 0">Sin sobrantes reutilizables registrados.</div>`;
+
+  return `
+    <div class="sec">Distribución de capital</div>
+    <div style="background:var(--s2);border:1px solid var(--bdr);border-radius:var(--r);padding:14px">
+      ${byTipo.length>0 ? tipoRows : '<div style="font-size:13px;color:var(--sub)">Sin items en inventario base.</div>'}
+      ${byTipo.length>0?`<div style="border-top:1px solid var(--bdr);padding-top:10px;margin-top:4px;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:1px">Total base + sobrantes</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;color:var(--acc)">${cop(valBase+valSob)}</div>
+      </div>`:''}
+    </div>
+    ${compraHTML}
+    <div class="sec">Sobrantes disponibles para reutilizar</div>
+    <div style="background:var(--s2);border:1px solid rgba(0,212,170,.15);border-radius:var(--r);padding:12px 14px">${reutHTML}</div>
+    <div class="stats2" style="margin-top:2px">
+      <div class="statc"><div class="statc-n" style="color:var(--acc)">${S.base.length}</div><div class="statc-l">Items base</div></div>
+      <div class="statc"><div class="statc-n" style="color:var(--acc2)">${reutilizables.length}</div><div class="statc-l">Reutilizables</div></div>
+    </div>`;
+}
+
+function shareCompra(){
+  const txt = window._shareText||'';
+  if(navigator.share){ navigator.share({text:txt}).catch(()=>{}); }
+  else { navigator.clipboard.writeText(txt).then(()=>alert('Lista copiada al portapapeles')).catch(()=>{ window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank'); }); }
+}
+
+// ══════════════════════════════════════════════
+// BASE INVENTORY
+// ══════════════════════════════════════════════
+function renderBase(){
+  const chips=['Todos',...TIPOS].map(t=>`<div class="chip ${S.fBase===t?'on':''}" onclick="setFB('${t}')">${t}</div>`).join('');
+  const filtered = S.base.filter(x=>{
+    const q=S.search.toLowerCase();
+    const mQ=!q||(x.nombre||'').toLowerCase().includes(q)||(x.codigo||'').toLowerCase().includes(q)||(x.specs||'').toLowerCase().includes(q);
+    const mT=S.fBase==='Todos'||x.tipo===S.fBase;
+    return mQ&&mT;
+  }).sort((a,b)=>{
+    const al=qty(a)<=Number(a.minQty||0)&&a.minQty>0?0:1;
+    const bl=qty(b)<=Number(b.minQty||0)&&b.minQty>0?0:1;
+    return al-bl;
+  });
+
+  let html='';
+  if(!filtered.length){
+    html=S.base.length?
+      `<div class="empty"><div class="empty-ico">🔍</div><div class="empty-txt">Sin resultados</div></div>`:
+      `<div class="empty"><div class="empty-ico">▣</div><div class="empty-txt">Sin items en inventario base.<br>Toca <strong>+</strong> para agregar.</div></div>`;
+  } else {
+    filtered.forEach(x=>{
+      const q=qty(x);
+      const min=Number(x.minQty||0);
+      const isOut=q===0&&min>0;
+      const isLow=!isOut&&q<=min&&min>0;
+      const qColor=isOut?'var(--err)':isLow?'var(--warn)':'var(--txt)';
+      html+=`
+        <div class="bli ${isOut?'alert':isLow?'warn':''}" id="bli-${x.id}">
+          <div class="bli-main">
+            <div class="bli-info" onclick="openModal('edit-base','${x.id}')">
+              <div class="bli-name">${esc(x.nombre)}</div>
+              <div class="bli-meta">
+                ${x.codigo?`<span class="code">${esc(x.codigo)}</span>`:''}
+                ${tbdg(x.tipo)}
+                ${x.color&&x.color!=='Natural'?`<span style="font-size:10px;color:var(--sub)">${esc(x.color)}</span>`:''}
+                ${unit(x)?`<span style="font-size:10px;color:var(--sub)">${cop(unit(x))} / ${esc(x.unidad||'')}</span>`:''}
+              </div>
+              ${x.specs?`<div style="font-size:11px;color:var(--sub);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.specs)}</div>`:''}
+            </div>
+            <div class="bli-controls">
+              <button class="qty-btn qty-minus" onclick="adjQty('${x.id}',-1)">−</button>
+              <div class="qty-val" style="color:${qColor}" onclick="openAdjModal('${x.id}')">${q}<div style="font-size:8px;color:var(--sub);font-weight:400">${esc(x.unidad||'')}</div></div>
+              <button class="qty-btn qty-plus" onclick="adjQty('${x.id}',+1)">+</button>
+            </div>
+          </div>
+          ${isOut?`<div class="bli-edit"><span style="font-size:11px;color:var(--err);font-weight:600">⬤ SIN STOCK — revisar compra</span><span style="font-size:10px;color:var(--sub)">mín: ${min} ${esc(x.unidad||'')}</span></div>`:isLow?`<div class="bli-edit"><span style="font-size:11px;color:var(--warn);font-weight:600">⚠ Stock bajo</span><span style="font-size:10px;color:var(--sub)">mín: ${min} ${esc(x.unidad||'')}</span></div>`:''}
+        </div>`;
+    });
+  }
+  return `
+    <div class="search-wrap">
+      <span style="font-size:14px;color:var(--sub)">⌕</span>
+      <input type="text" placeholder="Buscar por nombre, código, especificaciones..." value="${esc(S.search)}" oninput="S.search=this.value;render()">
+      ${S.search?`<span style="cursor:pointer;color:var(--sub);font-size:13px" onclick="S.search='';render()">✕</span>`:''}
+    </div>
+    <div class="chips">${chips}</div>
+    ${html}`;
+}
+function setFB(f){ S.fBase=f; render(); }
+
+// Quick qty adjust — no modal
+function adjQty(id, delta){
+  S.base=S.base.map(x=>{
+    if(x.id!==id) return x;
+    const nq=Math.max(0,qty(x)+delta);
+    return {...x,qty:String(nq)};
+  });
+  save(); render();
+}
+
+// Manual qty input modal
+function openAdjModal(id){
+  const x=S.base.find(i=>i.id===id);
+  if(!x) return;
+  openModal('adj-qty',id);
+}
+
+// ══════════════════════════════════════════════
+// SOBRANTES
+// ══════════════════════════════════════════════
+function renderSob(){
+  const chipDefs=['Disponibles','Todos',...TIPOS];
+  const chips=chipDefs.map(t=>`<div class="chip ${S.fSob===t?'on':''}" onclick="setFS('${t}')">${t}</div>`).join('');
+
+  const filtered = S.sob.filter(x=>{
+    const q=S.search.toLowerCase();
+    const mQ=!q||(x.specs||'').toLowerCase().includes(q)||(x.codigo||'').toLowerCase().includes(q)||(x.tipo||'').toLowerCase().includes(q)||(x.tipoUso||'').toLowerCase().includes(q)||(x.origen||'').toLowerCase().includes(q);
+    let mF=true;
+    if(S.fSob==='Disponibles') mF=x.reusable==='Sí';
+    else if(S.fSob!=='Todos') mF=x.tipo===S.fSob;
+    return mQ&&mF;
+  }).sort((a,b)=>(a.reusable==='Sí'?0:1)-(b.reusable==='Sí'?0:1));
+
+  const totalRe=S.sob.filter(x=>x.reusable==='Sí').length;
+  const valRe=S.sob.filter(x=>x.reusable==='Sí').reduce((s,x)=>s+(qty(x)*unit(x)),0);
+
+  let html='';
+  if(!filtered.length){
+    html=S.sob.length?
+      `<div class="empty"><div class="empty-ico">🔍</div><div class="empty-txt">Sin sobrantes ${S.fSob==='Disponibles'?'reutilizables ':''} registrados.</div></div>`:
+      `<div class="empty"><div class="empty-ico">◎</div><div class="empty-txt">Sin sobrantes registrados.<br>Registra retales de aluminio,<br>vidrios y herrajes no usados.</div></div>`;
+  } else {
+    filtered.forEach(x=>{
+      html+=`
+        <div class="sli ${x.reusable==='Sí'?'reutilizable':''}" onclick="openModal('edit-sob','${x.id}')">
+          <div class="sli-top">
+            <div class="sli-specs">${esc(x.specs||x.tipo)}</div>
+            <div class="sli-qty" style="color:${x.reusable==='Sí'?'var(--acc2)':'var(--sub)'}">
+              ${qty(x)} <span style="font-size:10px">${esc(x.unidad||'')}</span>
+              ${unit(x)?`<div style="font-size:10px;color:var(--sub)">${cop(qty(x)*unit(x))}</div>`:''}
+            </div>
+          </div>
+          <div class="sli-meta">
+            ${x.codigo?`<span class="code">${esc(x.codigo)}</span>`:''}
+            ${tbdg(x.tipo)}
+            ${bdg(x.reusable==='Sí'?'✓ Reutilizable':'No reutilizable',x.reusable==='Sí'?'b-re':'b-nre')}
+            ${x.tipoUso?`<span style="font-size:10px;color:var(--sub)">${esc(x.tipoUso)}</span>`:''}
+            ${x.origen?`<span style="font-size:10px;color:var(--sub)">↩ ${esc(x.origen)}</span>`:''}
+          </div>
+        </div>`;
+    });
+  }
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.15);border-radius:var(--r);padding:10px 14px">
+      <div><div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--acc2);font-weight:600">Reutilizables disponibles</div>
+        <div style="font-size:12px;color:var(--sub);margin-top:1px">${totalRe} item${totalRe!==1?'s':''}</div></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500;color:var(--acc2)">${cop(valRe)}</div>
+    </div>
+    <div class="search-wrap">
+      <span style="font-size:14px;color:var(--sub)">⌕</span>
+      <input type="text" placeholder="Buscar por medida, tipo, proyecto..." value="${esc(S.search)}" oninput="S.search=this.value;render()">
+      ${S.search?`<span style="cursor:pointer;color:var(--sub);font-size:13px" onclick="S.search='';render()">✕</span>`:''}
+    </div>
+    <div class="chips">${chips}</div>
+    ${html}`;
+}
+function setFS(f){ S.fSob=f; render(); }
+
+// ══════════════════════════════════════════════
+// FAB
+// ══════════════════════════════════════════════
+function fabAction(){
+  if(S.tab==='base') openModal('add-base',null);
+  else if(S.tab==='sob') openModal('add-sob',null);
+}
+
+// ══════════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════════
+const TITLES = {'add-base':'Nuevo item','edit-base':'Editar item','adj-qty':'Ajustar cantidad','add-sob':'Nuevo sobrante','edit-sob':'Editar sobrante'};
+function openModal(type,id){
+  S.modalType=type; S.modalId=id;
+  document.getElementById('sh-title').textContent=TITLES[type]||type;
+  document.getElementById('sh-body').innerHTML=formHTML(type,id);
+  document.getElementById('overlay').style.display='flex';
+}
+function closeModal(){ document.getElementById('overlay').style.display='none'; }
+function overlayClickHandler(e){ if(e.target.id==='overlay') closeModal(); }
+function gv(id){ return (document.getElementById(id)||{}).value||''; }
+
+// ══════════════════════════════════════════════
+// FORM HTML
+// ══════════════════════════════════════════════
+function formHTML(type,id){
+  if(type==='adj-qty'){
+    const x=S.base.find(i=>i.id===id)||{};
+    const q=qty(x);
+    return `
+      <div style="text-align:center;margin-bottom:8px">
+        <div style="font-size:13px;color:var(--sub);margin-bottom:6px">${esc(x.nombre)}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:40px;font-weight:500" id="adj-display">${q}</div>
+        <div style="font-size:12px;color:var(--sub)">${esc(x.unidad||'unidades')}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+        ${[-10,-5,-1,1,5,10].map(d=>`<button class="btn btn-ghost" onclick="adjStep('${id}',${d})">${d>0?'+':''}${d}</button>`).join('')}
+      </div>
+      <div class="field"><label>Cantidad exacta</label>
+        <input type="number" id="f-adjqty" value="${q}" min="0" style="text-align:center;font-size:18px;font-family:'JetBrains Mono',monospace" oninput="document.getElementById('adj-display').textContent=this.value||0">
+      </div>
+      <button class="btn btn-acc btn-full" onclick="saveAdj('${id}')">Confirmar</button>`;
+  }
+
+  if(type==='add-base'||type==='edit-base'){
+    const x=type==='edit-base'?S.base.find(i=>i.id===id)||{}:{};
+    const selOpt=(opts,val)=>opts.map(o=>`<option value="${esc(o)}" ${(val||opts[0])===o?'selected':''}>${esc(o)}</option>`).join('');
+    return `
+      <div class="row2">
+        <div class="field"><label>Tipo</label><select id="f-tipo">${selOpt(TIPOS,x.tipo)}</select></div>
+        <div class="field"><label>Código <span style="color:var(--sub)">(opcional)</span></label><input id="f-codigo" value="${esc(x.codigo||'')}" placeholder="Auto o manual" autocomplete="off"><span style="font-size:10px;color:var(--acc);cursor:pointer;display:block;text-align:right;margin-top:3px" onclick="autoCode()">Generar →</span></div>
+      </div>
+      <div class="field"><label>Nombre *</label><input id="f-nombre" value="${esc(x.nombre||'')}" placeholder="Ej: Perfil 8025 natural 6m" autocomplete="off"></div>
+      <div class="field"><label>Especificaciones técnicas</label><input id="f-specs" value="${esc(x.specs||'')}" placeholder="Medidas, espesor, perfil..." autocomplete="off"></div>
+      <div class="row2">
+        <div class="field"><label>Color</label><select id="f-color">${selOpt(COLORES,x.color)}</select></div>
+        <div class="field"><label>Ubicación</label><select id="f-ubicacion">${selOpt(UBICS,x.ubicacion)}</select></div>
+      </div>
+      <div class="row3">
+        <div class="field"><label>Cantidad</label><input type="number" id="f-qty" value="${x.qty||0}" min="0"></div>
+        <div class="field"><label>Unidad</label><select id="f-unidad">${selOpt(UNIDS,x.unidad)}</select></div>
+        <div class="field"><label>Stock mín.</label><input type="number" id="f-minqty" value="${x.minQty||0}" min="0" placeholder="0"></div>
+      </div>
+      <div class="field"><label>Costo unitario (COP)</label><input type="number" id="f-ucost" value="${x.unitCost||''}" placeholder="0"></div>
+      <div class="btn-row">
+        ${type==='edit-base'?`<button class="btn btn-del" onclick="delBase('${id}')">Eliminar</button>`:''}
+        <button class="btn btn-acc" style="flex:1" onclick="submitBase('${type==='edit-base'?id:''}')">Guardar</button>
+      </div>`;
+  }
+
+  if(type==='add-sob'||type==='edit-sob'){
+    const x=type==='edit-sob'?S.sob.find(i=>i.id===id)||{}:{};
+    const selOpt=(opts,val)=>opts.map(o=>`<option value="${esc(o)}" ${(val||opts[0])===o?'selected':''}>${esc(o)}</option>`).join('');
+    const reVal=x.reusable||'Sí';
+    return `
+      <div class="row2">
+        <div class="field"><label>Tipo</label><select id="f-stipo">${selOpt(TIPOS,x.tipo)}</select></div>
+        <div class="field"><label>Código</label><input id="f-scodigo" value="${esc(x.codigo||'')}" placeholder="Auto" autocomplete="off"><span style="font-size:10px;color:var(--acc);cursor:pointer;display:block;text-align:right;margin-top:3px" onclick="autoSobCode()">Generar →</span></div>
+      </div>
+      <div class="field"><label>Especificaciones + medidas exactas *</label><input id="f-sspecs" value="${esc(x.specs||'')}" placeholder="Ej: Perfil 8025 negro 1.45m · Vidrio 8mm 400×600mm" autocomplete="off"></div>
+      <div class="row3">
+        <div class="field"><label>Cantidad</label><input type="number" id="f-sqty" value="${x.qty||1}" min="0"></div>
+        <div class="field"><label>Unidad</label><select id="f-sunidad">${selOpt(UNIDS,x.unidad)}</select></div>
+        <div class="field"><label>Costo unit.</label><input type="number" id="f-sucost" value="${x.unitCost||''}" placeholder="0"></div>
+      </div>
+      <div class="field"><label>¿Reutilizable?</label>
+        <div class="form-chips" id="rch">
+          <div class="form-chip ${reVal==='Sí'?'on':''}" onclick="setReusable('Sí')">✓ Sí, disponible</div>
+          <div class="form-chip ${reVal==='No'?'on':''}" onclick="setReusable('No')">No</div>
+        </div>
+        <input type="hidden" id="f-sreusable" value="${esc(reVal)}">
+      </div>
+      <div class="row2">
+        <div class="field"><label>Tipo de uso</label><select id="f-stusoUso">${selOpt(TUSOS,x.tipoUso)}</select></div>
+        <div class="field"><label>Proyecto origen</label><input id="f-sorigen" value="${esc(x.origen||'')}" placeholder="Nombre del proyecto" autocomplete="off"></div>
+      </div>
+      <div class="btn-row">
+        ${type==='edit-sob'?`<button class="btn btn-del" onclick="delSob('${id}')">Eliminar</button>`:''}
+        <button class="btn btn-acc" style="flex:1" onclick="submitSob('${type==='edit-sob'?id:''}')">Guardar</button>
+      </div>`;
+  }
+  return '';
+}
+
+// ══════════════════════════════════════════════
+// ACTIONS
+// ══════════════════════════════════════════════
+function autoCode(){ const t=gv('f-tipo'); const p={Aluminio:'AL',Vidrio:'VI',Herraje:'HE',Insumo:'IN'}[t]||'XX'; document.getElementById('f-codigo').value=p+'-'+Date.now().toString(36).toUpperCase().slice(-4); }
+function autoSobCode(){ document.getElementById('f-scodigo').value='SOB-'+Date.now().toString(36).toUpperCase().slice(-5); }
+function setReusable(v){ document.getElementById('f-sreusable').value=v; document.querySelectorAll('#rch .form-chip').forEach(c=>c.classList.toggle('on',c.textContent.trim().startsWith(v==='Sí'?'✓':'No'))); }
+
+function adjStep(id,d){
+  S.base=S.base.map(x=>x.id===id?{...x,qty:String(Math.max(0,qty(x)+d))}:x);
+  save();
+  const el=document.getElementById('f-adjqty');
+  const disp=document.getElementById('adj-display');
+  const cur=S.base.find(x=>x.id===id);
+  if(el) el.value=qty(cur);
+  if(disp) disp.textContent=qty(cur);
+  updateHeader();
+}
+function saveAdj(id){
+  const nq=Math.max(0,Number(gv('f-adjqty'))||0);
+  S.base=S.base.map(x=>x.id===id?{...x,qty:String(nq)}:x);
+  save(); closeModal(); render();
+}
+
+function submitBase(editId){
+  const nombre=gv('f-nombre');
+  if(!nombre.trim()){alert('El nombre es obligatorio');return;}
+  const item={codigo:gv('f-codigo'),tipo:gv('f-tipo'),nombre,specs:gv('f-specs'),color:gv('f-color'),ubicacion:gv('f-ubicacion'),qty:gv('f-qty')||'0',unidad:gv('f-unidad'),minQty:gv('f-minqty')||'0',unitCost:gv('f-ucost')||'0'};
+  if(editId){ S.base=S.base.map(x=>x.id===editId?{...x,...item}:x); }
+  else{ S.base.push({...item,id:uid(),at:Date.now()}); }
+  save(); closeModal(); render();
+}
+function delBase(id){ if(!confirm('¿Eliminar este item?')) return; S.base=S.base.filter(x=>x.id!==id); save(); closeModal(); render(); }
+
+function submitSob(editId){
+  const specs=gv('f-sspecs');
+  if(!specs.trim()){alert('Las especificaciones son obligatorias');return;}
+  const item={codigo:gv('f-scodigo'),tipo:gv('f-stipo'),specs,qty:gv('f-sqty')||'1',unidad:gv('f-sunidad'),reusable:gv('f-sreusable')||'Sí',tipoUso:gv('f-stusoUso'),origen:gv('f-sorigen'),unitCost:gv('f-sucost')||'0'};
+  if(editId){ S.sob=S.sob.map(x=>x.id===editId?{...x,...item}:x); }
+  else{ S.sob.push({...item,id:uid(),at:Date.now()}); }
+  save(); closeModal(); render();
+}
+function delSob(id){ if(!confirm('¿Eliminar este sobrante?')) return; S.sob=S.sob.filter(x=>x.id!==id); save(); closeModal(); render(); }
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+load();
+go('dash');
+
+// ══════════════════════════════════════════════
+// SERVICE WORKER REGISTRATION
+// ══════════════════════════════════════════════
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js',{scope:'/MetalINV/'})
+    .then(reg=>{
+      console.log('[App] Service Worker registrado ✓');
+      // Buscar actualizaciones cada 30 min
+      setInterval(()=>{
+        reg.update().then(()=>{
+          if(reg.waiting){
+            console.log('[App] Nueva versión disponible');
+            // Notificar al usuario (opcional)
+            if(confirm('Hay una actualización disponible. ¿Aplicarla ahora?')){
+              reg.waiting.postMessage({type:'SKIP_WAITING'});
+              window.location.reload();
+            }
+          }
+        });
+      },1800000);
+    })
+    .catch(err=>console.log('[App] Error registrando SW:', err));
+}
+</script>
+</body>
+</html>
