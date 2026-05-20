@@ -1,4 +1,4 @@
-const CACHE_NAME = 'metalinv-v1';
+const CACHE_NAME = 'metalinv-v1.1';
 const URLS_TO_CACHE = [
   '/MetalINV/',
   '/MetalINV/index.html',
